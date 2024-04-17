@@ -1,0 +1,1053 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Markdown Plus exported HTML</title><link rel="stylesheet" href="https://unpkg.com/markdown-core@1.1.0/dist/index.bundle.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/mermaid/6.0.0/mermaid.css"></head><body><article class="markdown-body"><h1 id="attention" data-source-line="1"><a class="anchor" href="#attention"><span class="octicon octicon-link"></span></a><strong><em>ATTENTION</em></strong></h1>
+<h2 id="아래-코드는-br2023년-07월-20-21일-유전체학회에서-실시하는-통계유전학워크샵의br메타지놈분석-고급-shotgun-metagenomics-데이터-실습-수업을-위해-준비한-것입니다-br" data-source-line="3"><a class="anchor" href="#아래-코드는-br2023년-07월-20-21일-유전체학회에서-실시하는-통계유전학워크샵의br메타지놈분석-고급-shotgun-metagenomics-데이터-실습-수업을-위해-준비한-것입니다-br"><span class="octicon octicon-link"></span></a>아래 코드는 <br>
+2023년 07월 20-21일 유전체학회에서 실시하는 통계유전학워크샵의<br>
+메타지놈분석-고급 (Shotgun Metagenomics 데이터) 실습 수업을 위해 준비한 것입니다. <br></h2>
+<p data-source-line="7">강의자료 제작: <span style="color:blue">성균관대학교 삼성융합의과학원 (SAIHST) <strong>김한나</strong></span> (문의: <a href="mailto:147942@hanmail.net">147942@hanmail.net</a>)</p>
+<hr>
+<p data-source-line="11">파란 글씨는 클릭이 가능하며, <strong>오른쪽 클릭으로 새창으로 열기</strong>로 여시면, 해당 웹페이지로 연결됩니다. Github 에서 코드를 Copy&amp;Paste 하여 진행하며, 차후 다시보려면 html 파일을 사파리나 <a href="https://www.google.com/intl/ko/chrome/">크롬브라우저</a>를 이용하기 바랍니다.</p>
+<h2 id="download-실습파일-kogo_shotgun" data-source-line="14"><a class="anchor" href="#download-실습파일-kogo_shotgun"><span class="octicon octicon-link"></span></a>Download 실습파일: KOGO_Shotgun</h2>
+<ul data-source-line="15">
+<li>
+<p>실습에 사용할 PC의 OS 확인</p>
+<ul>
+<li>
+<h4 id="window-64bit"><a class="anchor" href="#window-64bit"><span class="octicon octicon-link"></span></a>Window (64bit)</h4>
+</li>
+<li>Mac (Intel 또는 M1 chip)</li>
+<li>
+<h4 id="linux"><a class="anchor" href="#linux"><span class="octicon octicon-link"></span></a>Linux</h4>
+</li>
+</ul>
+</li>
+<li>
+<p>실습 파일 (이메일로 사전 안내된 구글드라이브 링크로 다운로드)</p>
+</li>
+<li>
+<p>압축파일 통째로 <strong>바탕화면</strong> 에 다운로드 후, 바탕화면에서 압축을 푸세요.</p>
+</li>
+</ul>
+<p data-source-line="23"><strong>본 실습파일은 말 그대로 실습용으로서, 실제 연구나 논문작성 등에 사용할 수 없으며, 차후 연구자의 실제 연구 데이터로 본 메뉴얼을 참고하여 분석 시 활용할 수 있으나, 프로그램이나 DB의 업데이트에 따라 일부 명령어가 달라질 수 있습니다.</strong></p>
+<hr>
+<blockquote data-source-line="28">
+<h2 id="contents"><a class="anchor" href="#contents"><span class="octicon octicon-link"></span></a>Contents</h2>
+</blockquote>
+<ul data-source-line="31">
+<li>
+<p><a href="#raw-data-processing-qcfitering">Raw data processing: QC/Fitering</a></p>
+<ul>
+<li><a href="#1-raw-data-fastq-quality-%ED%99%95%EC%9D%B8">1. Raw data (fastq) quality 확인</a></li>
+<li><a href="#2-quality-filtering">2. Quality Filtering</a></li>
+<li><a href="#3-QCed-fastq-quality-%EC%B2%B4%ED%81%AC">3. QCed fastq quality 체크</a></li>
+<li><a href="#3-removal-of-unwanted-reads-human-%EC%8B%9C%ED%80%80%EC%8A%A4-%EC%A0%9C%EA%B1%B0">4. Removal of unwanted reads (Human 시퀀스 제거)</a></li>
+</ul>
+</li>
+<li>
+<p><a href="#taxonomic-functional-profiling">Taxonomic &amp; Functional Profiling</a></p>
+<ul>
+<li><a href="#1-taxonomy-profiling">1. Taxonomy Profiling</a>
+<ul>
+<li><a href="#tool-1-kraken2-bracken-%EC%9D%B4%EC%9A%A9">Tool 1: Kraken2 / Bracken 이용</a></li>
+<li><a href="#tool-2-metaphlan4-%EC%9D%B4%EC%9A%A9-humann3-%ED%99%9C%EC%9A%A9">Tool 2: MetaPhLan4 이용 (HUMAnN3 활용)</a></li>
+</ul>
+</li>
+<li><a href="#2-functional-profiling">2. Functional Profiling</a></li>
+</ul>
+</li>
+<li>
+<p><a href="#assembly">Assembly</a></p>
+</li>
+</ul>
+<br>
+<h1 id="raw-data-processing-qcfitering" data-source-line="48"><a class="anchor" href="#raw-data-processing-qcfitering"><span class="octicon octicon-link"></span></a>Raw data processing: QC/Fitering</h1>
+<h3 id="1-raw-data-fastq-quality-확인" data-source-line="49"><a class="anchor" href="#1-raw-data-fastq-quality-확인"><span class="octicon octicon-link"></span></a>1. Raw data (fastq) quality 확인</h3>
+<h4 id="-tool-fastqc-이용" data-source-line="50"><a class="anchor" href="#-tool-fastqc-이용"><span class="octicon octicon-link"></span></a>- Tool: <a href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/">FastQC</a> 이용</h4>
+<hr>
+<ul data-source-line="53">
+<li>작업폴더 (KOGO_Shotgun)로 이동</li>
+</ul>
+<pre><code class="hljs"><span class="hljs-built_in">cd</span> /mnt/c/Users/윈도우사용자계정/Desktop/KOGO_Shotgun    <span class="hljs-comment"># 항상 이 위치를 기억하고, 길을 잃었을땐, 이 위치로 돌아오세요.</span>
+
+<span class="hljs-comment"># 또는 외장하드나 파티션 드라이브에 KOGO_winter 폴더를 저장한 경우에는,</span>
+
+<span class="hljs-built_in">cd</span> /mnt/e/KOGO_Shotgun    <span class="hljs-comment"># 이 위치로 늘 돌아오세요 (E: 드라이브일 경우, 소문자 e, D: 나 F: 드라이브도, d, f 등의 소문자를 사용하세요)</span></code></pre><pre><code class="hljs"><span class="hljs-built_in">cd</span> ./Inputs</code></pre><pre><code class="hljs">ls</code></pre><ul data-source-line="67">
+<li>
+<p>총 2명(toy1, toy2)의 paired-end fastq 파일 4세트</p>
+<ul>
+<li>각 1만 reads 시퀀스 데이터</li>
+</ul>
+<pre><code>├── Inputs
+    ├── toy1_gut_R1.fastq.gz
+    ├── toy1_gut_R2.fastq.gz
+    ├── toy2_gut_R1.fastq.gz
+    ├── toy2_gut_R2.fastq.gz
+     
+</code></pre>
+</li>
+<li>
+<p>Fastq 파일 하나를 구경해봅시다 (종료하려면 q 를 입력해서 빠져나옵니다.)</p>
+</li>
+</ul>
+<pre><code class="hljs">gzip -dc toy1_gut_R1.fastq.gz | less -S</code></pre><ul data-source-line="82">
+<li>toy1_gut_R2.fastq.gz 1개 파일만 돌려보기</li>
+<li><code>cd ../</code> 를 사용하여 한단계 위 폴더(KOGO_Shotgun 폴더)위치로 이동</li>
+<li>my_results 라는 빈 폴더 하나를 만들께요.</li>
+</ul>
+<pre><code>mkdir my_results
+</code></pre>
+<ul data-source-line="89">
+<li>FastQC 실행</li>
+</ul>
+<pre><code class="hljs">./Win_tools/FastQC/fastqc \
+./Inputs/toy1_gut_R2.fastq.gz \
+-o ./my_results/</code></pre><ul data-source-line="95">
+<li>
+<p>FastQC 결과파일</p>
+<ul>
+<li>html 파일 1개에 모든 QC 결과가 저장됨</li>
+<li>Basic Statistics: 시퀀스에 대한 기본적인 통계</li>
+<li>Per base sequence quality: read 의 각 base position 이 가지는 평균 quality score
+<ul>
+<li>Warning: 어떤 base의 low quartile 이 &lt;10 일때, 또는 median 이 &lt;25 일때</li>
+<li>Failure: low quartile &lt;5 또는 median &lt;20</li>
+</ul>
+</li>
+<li>Per sequence quality scores: 각 reads 가 가지는 평균 quality score 의 분포도
+<ul>
+<li>Warning: mean quality &lt;27</li>
+<li>Failure: mean quality &lt;20</li>
+</ul>
+</li>
+<li>Per base sequence contents: ATGC 구성차이가 &gt;10% 일때 Warning, 20% 일때 Failure
+<ul>
+<li>일부 구간에서 Failure 라면, library contamination (overrepresented sequence)등을 의심</li>
+<li>전 구간에서 일관된 bias: original library 시퀀스 문제이거나 시퀀싱동안 systematic 문제가 있는 것으로 의심</li>
+</ul>
+</li>
+<li>Per sequence GC content</li>
+<li>Per base N content: N 으로 calling된 base 의 %</li>
+<li>Sequence Length Distribution</li>
+<li>Sequence Duplication Levels</li>
+<li>Overrepresented sequences: 예상되는 것보다 많이 관측되는 특정 sequence</li>
+<li>Adapter Content: 시퀀스에 adapter 시퀀스가 포함되어 있는지 확인</li>
+</ul>
+</li>
+<li>
+<p>FastQC 프로그램은 Java 기반으로 만들어져있으므로, 아이콘을 더블클릭해도 실행 가능하나, 여러파일을 동시에 실행하기 위해서는 터미널 이용이 효율적</p>
+</li>
+<li>
+<p>8개의 input files 의 Fastqc 결과</p>
+<ul>
+<li>Outputs 폴더 &gt; 01_fastqc 폴더에 결과 저장</li>
+<li>Finder로 확인하세요.</li>
+<li>실습에 사용한 fastq 파일은, 짧은시간의 실습진행을 위해, 작은 사이즈로 임의로 만들어진 파일이므로, Qaultiy 에 대한 판단은 불가능하다는 것을 참고하여 보시길 바랍니다.</li>
+</ul>
+</li>
+</ul>
+<pre><code class="hljs">├── Outputs
+    ├── 01_fastqc
+        ├── toy1_gut_R1_fastqc.html
+        ├── toy1_gut_R1_fastqc.zip
+        ├── toy1_gut_R2_fastqc.html
+        ├── toy1_gut_R2_fastqc.zip
+        ├── toy2_gut_R1_fastqc.html
+        ├── toy2_gut_R1_fastqc.zip
+        ├── toy2_gut_R2_fastqc.html
+        ├── toy2_gut_R2_fastqc.zip</code></pre><ul data-source-line="134">
+<li>
+<p><a href="https://multiqc.info">MultiQC</a> 프로그램으로 여러개의 결과파일을 동시에 보며 비교하기</p>
+</li>
+<li>
+<p>FastQC 결과 폴더로 이동</p>
+</li>
+<li>
+<p>MultiQC output file 만들 my_results 폴더로 이동</p>
+</li>
+</ul>
+<pre><code class="hljs"><span class="hljs-built_in">cd</span> ~/Desktop/KOGO_Shotgun/my_results</code></pre><ul data-source-line="142">
+<li>FastQC 결과 폴더에서 MultiQC 실행</li>
+</ul>
+<pre><code class="hljs">multiqc ~/Desktop/KOGO_Shotgun/Outputs/01_fastqc/* --outdir ./multiqc_fastQC</code></pre><ul data-source-line="147">
+<li>생성된 multiqc_report.html 열어보기</li>
+<li>MultiQC 프로그램은 FastQC 뿐만 아니라 다양한 Tools 의 여러 샘플의 결과를 합쳐주는 프로그램으로 유전체 분석시 유용하게 사용할 수 있습니다.</li>
+<li>MultiQC 가 지원되는 Tools 리스트는 <a href="https://multiqc.info/modules/">홈페이지</a>에서 직접 확인하세요.</li>
+</ul>
+<br>
+<h3 id="2-quality-filtering" data-source-line="154"><a class="anchor" href="#2-quality-filtering"><span class="octicon octicon-link"></span></a>2. Quality Filtering</h3>
+<h4 id="-tool-trimmomatic-이용" data-source-line="156"><a class="anchor" href="#-tool-trimmomatic-이용"><span class="octicon octicon-link"></span></a>- Tool: <a href="http://www.usadellab.org/cms/?page=trimmomatic">Trimmomatic</a> 이용</h4>
+<hr>
+<ul data-source-line="159">
+<li>우리는 1. 단계에서 raw data 상태를 확인만 해본 것이지, 아직 어떤 QC 도 진행하지 않았습니다.</li>
+<li>이제 Adapter 시퀀스 제거 및 low quality 시퀀스를 제거해보겠습니다.</li>
+<li>작업폴더 (KOGO_Shotgun)로 이동</li>
+</ul>
+<pre><code class="hljs"><span class="hljs-built_in">cd</span> /mnt/c/Users/윈도우사용자계정/Desktop/KOGO_Shotgun</code></pre><ul data-source-line="166">
+<li>Trimmomatic 을 이용하여 QC 진행</li>
+</ul>
+<pre><code class="hljs">java -jar ./Win_tools/Trimmomatic-0.39/trimmomatic-0.39.jar \
+   PE \
+   ./Inputs/toy1_gut_R1.fastq.gz \
+   ./Inputs/toy1_gut_R2.fastq.gz \
+   ./my_results/02_toy1_gut_R1_paired.fastq \
+   ./my_results/02_toy1_gut_R1_unpaired.fastq \
+   ./my_results/02_toy1_gut_R2_paired.fastq \
+   ./my_results/02_toy1_gut_R2_unpaired.fastq \
+   ILLUMINACLIP:./Mac_tools/Trimmomatic-0.39/adapters/TruSeq3-PE.fa:2:30:10 \
+   LEADING:3 \
+   TRAILING:3 \
+   SLIDINGWINDOW:4:30 \
+   MINLEN:87</code></pre><ul data-source-line="183">
+<li>
+<p>output 파일 순서 유의</p>
+<ul>
+<li>paired-end 의 경우, 1명 샘플에서 2개의 input files (R1, R2)에 4개의 output files 생성</li>
+</ul>
+</li>
+<li>
+<p>ILLUMINACLIP: adapter 제거 옵션</p>
+</li>
+<li>
+<p>LEADING: 5'쪽 triming (Phred score &lt;3 or N)</p>
+</li>
+<li>
+<p>TRAILING: 3'쪽 triming (Phred score &lt;3 or N)</p>
+</li>
+<li>
+<p>SLIDINGWINDOW: 5'쪽부터 4 bases (:4)씩 스캐닝하면서, window 내 평균 quality &lt;20 (:20)이면 clips 하는 trimming 방법</p>
+</li>
+<li>
+<p>MINLEN: read lenghs (150bp 경우) trimming 전후 70% 미만 길이(read length 125bp 경우 87bp, 150bp 경우 105bp)이면 제거</p>
+</li>
+<li>
+<p>Trimmomatic 에 대한 자세한 옵션 설명은 <a href="http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/TrimmomaticManual_V0.32.pdf">Trimmomatic manual</a> 참고</p>
+</li>
+<li>
+<p>Trimmomatic 결과 파일</p>
+</li>
+</ul>
+<pre><code>├── my_results
+    ├── 02_toy1_gut_R1_paired.fastq
+    ├── 02_toy1_gut_R1_unpaired.fastq
+    ├── 02_toy1_gut_R2_paired.fastq
+    ├── 02_toy1_gut_R2_unpaired.fastq
+</code></pre>
+<br>
+<h3 id="3-qced-fastq-quality-체크" data-source-line="207"><a class="anchor" href="#3-qced-fastq-quality-체크"><span class="octicon octicon-link"></span></a>3. QCed fastq quality 체크</h3>
+<ul data-source-line="208">
+<li>1차 QC가 끝난 파일을 FastQC를 이용해서 다시 살펴보기</li>
+</ul>
+<pre><code class="hljs">./Win_tools/FastQC/fastqc \
+./my_results/02_toy1_gut_R1_paired.fastq \
+-o ./my_results/</code></pre><ul data-source-line="214">
+<li>FastQC 결과파일</li>
+</ul>
+<pre><code>├── My_results
+    ├── 02_toy1_gut_R1_paired_fastqc.html
+    ├── 02_toy1_gut_R1_paired_fastqc.zip
+</code></pre>
+<ul data-source-line="220">
+<li>
+<p>raw data 의 FastQC 결과 파일과 비교해보세요. 무엇이 달라졌나요?</p>
+</li>
+<li>
+<p>4개의 input files 의 Trimmomatic 결과</p>
+<ul>
+<li>Outputs 폴더 &gt; 02_trimmomatic 폴더에 결과 저장</li>
+<li>Finder로 확인하세요.</li>
+</ul>
+</li>
+</ul>
+<pre><code class="hljs">├── Outputs
+    ├── 02_trimmomatic
+        ├── 02_toy1_gut_R1_paired.fastq
+        ├── 02_toy1_gut_R1_unpaired.fastq
+        ├── 02_toy1_gut_R2_paired.fastq
+        ├── 02_toy1_gut_R2_unpaired.fastq
+        ├── 02_toy2_gut_R1_paired.fastq
+        ├── 02_toy2_gut_R1_unpaired.fastq
+        ├── 02_toy2_gut_R2_paired.fastq
+        ├── 02_toy2_gut_R2_unpaired.fastq</code></pre><ul data-source-line="239">
+<li>MultiQC 프로그램으로 여러개의 결과파일을 동시에 보며 비교하기</li>
+<li>Working directory로 이동</li>
+</ul>
+<pre><code class="hljs"><span class="hljs-built_in">cd</span> ~/Desktop/KOGO_Shotgun</code></pre><ul data-source-line="245">
+<li>MultiQC 실행</li>
+</ul>
+<pre><code class="hljs">multiqc ./Outputs/03_fastqc/* --outdir ./my_results/multiqc_fastQC_filtered</code></pre><ul data-source-line="249">
+<li>4개의 QC 된 fastq 파일들의 QC 결과. multiqc_report.html 파일을 열어보세요. 무엇이 달라졌나요?</li>
+</ul>
+<br>
+<h3 id="4-removal-of-unwanted-reads-human-시퀀스-제거" data-source-line="253"><a class="anchor" href="#4-removal-of-unwanted-reads-human-시퀀스-제거"><span class="octicon octicon-link"></span></a>4. Removal of unwanted reads (Human 시퀀스 제거)</h3>
+<h4 id="-tool-bowtie2-와-samtools-이용" data-source-line="254"><a class="anchor" href="#-tool-bowtie2-와-samtools-이용"><span class="octicon octicon-link"></span></a>- Tool: <a href="https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml">Bowtie2</a> 와 <a href="https://samtools.sourceforge.net">samtools</a> 이용</h4>
+<hr>
+<p data-source-line="257">1). QC 가 끝난 cleaned fastq 파일을 human reference genome 에 mapping</p>
+<pre><code class="hljs"><span class="hljs-built_in">cd</span> ~/Desktop/KOGO_Shotgun</code></pre><pre><code class="hljs">./Win_tools/bowtie2-2.5.0-linux-x86_64/bowtie2 \
+ --very-sensitive-local \
+ -p 2 \
+ --seed 99 \
+ -x ./DB/GRCh38_noalt_as/GRCh38_noalt_as \
+ -1 ./my_results/02_toy1_gut_R1_paired.fastq \
+ -2 ./my_results/02_toy1_gut_R2_paired.fastq \
+ -S ./my_results/04_toy1_mapped_and_unmapped.sam</code></pre><ul data-source-line="273">
+<li>결과파일: 04_toy1_mapped_and_unmapped.sam
+<ul>
+<li>human reference genome 에 mapped 된 리드와, unmapped 리드들이 모두 이 하나의 파일에 들어있음</li>
+</ul>
+</li>
+</ul>
+<p data-source-line="276">2). SAM 파일을 BAM 파일로 변환</p>
+<pre><code class="hljs">./Win_tools/samtools-1.16.1/samtools view \
+ -@ 2 \
+ -bS ./my_results/04_toy1_mapped_and_unmapped.sam \
+ &gt; ./my_results/04_toy1_mapped_and_unmapped.bam</code></pre><p data-source-line="284">3). Human genome 에 mapped 되지 않은 (Metagenome으로 예상되는) unmapped reads 만 추출</p>
+<ul data-source-line="285">
+<li>samtools flag 사용: <a href="https://broadinstitute.github.io/picard/explain-flags.html">SAM flags</a> 설명
+<ul>
+<li>-f12: Extract (-f) only alignments with both reads unmapped: "read unmapped"/"mate unmapped"</li>
+<li>-F256: Do not extract (-F) alignments which are: "not primary alignment"</li>
+</ul>
+</li>
+<li>R1 read 와 R2 read 모두 동시에 unmap 인 reads 만 추출</li>
+</ul>
+<pre><code class="hljs">./Win_tools/samtools-1.16.1/samtools view \
+ -@ 2 \
+ -b <span class="hljs-_">-f</span> 12 -F 256 \
+ ./my_results/04_toy1_mapped_and_unmapped.bam \
+ &gt; ./my_results/05_toy1.unmapped.bam</code></pre><p data-source-line="297">4). Sort the reads</p>
+<pre><code class="hljs">./Win_tools/samtools-1.16.1/samtools sort \
+ -@ 2 \
+ -n ./my_results/05_toy1.unmapped.bam \
+ -o ./my_results/06_toy1.unmap.sorted.bam</code></pre><p data-source-line="305">5-1). Sorted reads 를 (merged) fastq 포멧으로 변환</p>
+<pre><code class="hljs">./Win_tools/samtools-1.16.1/samtools bam2fq \
+ -@ 2 \
+ ./my_results/06_toy1.unmap.sorted.bam \
+ &gt; ./my_results/07_toy1_metagenome.fastq</code></pre><p data-source-line="313">5-2). Sorted reads 를 individual fastq (R1, R2) 포멧으로 변환</p>
+<pre><code class="hljs">./Win_tools/samtools-1.16.1/samtools fastq \
+-@ 2 \
+./my_results/06_toy1.unmap.sorted.bam \
+-1 ./my_results/08_toy1_QCed_R1.fastq.gz \
+-2 ./my_results/08_toy1_QCed_R2.fastq.gz \
+-0 /dev/null <span class="hljs-_">-s</span> /dev/null -n</code></pre><p data-source-line="324">6). 최종 metagenome.fasq 파일 확인</p>
+<pre><code class="hljs">less -S ./my_results/07_toy1_metagenome.fastq</code></pre><ul data-source-line="329">
+<li>PhiX 시퀀스 제거 역시 위 1)-5) 과정을 한번 더 똑같이 하면 됩니다.</li>
+<li>8개의 input files (QCed fastq files) 의 Bowtie2 &amp; Samtools 수행 결과
+<ul>
+<li>Outputs 폴더 &gt; 04_filter_out_human 폴더에 결과 저장</li>
+<li>Finder로 확인하세요.</li>
+<li>low quality 시퀀스가 제거되고, host contaminant 도 제거된 메타지놈 시퀀스 파일입니다.</li>
+</ul>
+</li>
+</ul>
+<pre><code class="hljs">├── Outputs
+    ├── 04_filter_out_human
+       ├── toy1.unmap.sorted.bam
+       ├── toy1.unmapped.bam
+       ├── toy1_QCed_R1.fastq.gz  &lt;- 이후 Assembly 단계에서 input file
+       ├── toy1_QCed_R2.fastq.gz  &lt;- 이후 Assembly 단계에서 input file
+       ├── toy1_mapped_and_unmapped.bam
+       ├── toy1_mapped_and_unmapped.sam
+       ├── toy1_metagenome.fastq  &lt;- 이후 HuMaNn 분석 시, input file
+       ├── toy2.unmap.sorted.bam
+       ├── toy2.unmapped.bam
+       ├── toy2_QCed_R1.fastq.gz  &lt;- 이후 Assembly 단계에서 input file
+       ├── toy2_QCed_R2.fastq.gz  &lt;- 이후 Assembly 단계에서 input file
+       ├── toy2_mapped_and_unmapped.bam
+       ├── toy2_mapped_and_unmapped.sam
+       ├── toy2_metagenome.fastq  &lt;- 이후 HuMaNn 분석 시, input file</code></pre><br>
+<hr>
+<p data-source-line="355">(옵션) <a href="https://huttenhower.sph.harvard.edu/kneaddata/">Kneaddata</a> 프로그램을 사용하여, Trimommatic 과 bowtie2 를 한꺼번에 돌릴 수도 있음</p>
+<h4 id="-본-실습에서는-진행하지-않겠습니다-필요하신-분들만-워크샵-이후에-참고하세요" data-source-line="356"><a class="anchor" href="#-본-실습에서는-진행하지-않겠습니다-필요하신-분들만-워크샵-이후에-참고하세요"><span class="octicon octicon-link"></span></a>- <code>본 실습에서는 진행하지 않겠습니다.</code> 필요하신 분들만 워크샵 이후에 참고하세요!</h4>
+<h6 id="-kneaddata-설치" data-source-line="357"><a class="anchor" href="#-kneaddata-설치"><span class="octicon octicon-link"></span></a>- Kneaddata 설치</h6>
+<pre><code class="hljs"><span class="hljs-comment">#pip install kneaddata   #실제 사용할때는 명령어 앞 #지우고 사용</span></code></pre><h6 id="-kneaddata-실행" data-source-line="362"><a class="anchor" href="#-kneaddata-실행"><span class="octicon octicon-link"></span></a>- Kneaddata 실행</h6>
+<pre><code class="hljs"><span class="hljs-comment">#kneaddata \</span>
+<span class="hljs-comment">#-i ./Inputs/toy1_gut_R1.fastq.gz -i ./Inputs/toy1_gut_R2.fastq.gz \</span>
+<span class="hljs-comment">#-db ./DB/GRCh38_noalt_as/GRCh38_noalt_as \</span>
+<span class="hljs-comment">#-db ./DB/PhiX_bt/genome \</span>
+<span class="hljs-comment">#-o ./Outputs/kneaddata_toy1 \</span>
+<span class="hljs-comment">#--fastqc ./Mac/FastQC.app/Contents/MacOS/fastqc \</span>
+<span class="hljs-comment">#--run-trim-repetitive \</span>
+<span class="hljs-comment">#--trimmomatic ./Trimmomatic-0.39 \</span>
+<span class="hljs-comment">#--trimmomatic-options="SLIDINGWINDOW:4:20 MINLEN:87" \</span>
+<span class="hljs-comment">#--sequencer-source TruSeq3 \</span>
+<span class="hljs-comment">#--bypass-trf \</span>
+<span class="hljs-comment">#--store-temp-output    #실제 사용할때는 명령어 앞 #지우고 사용</span></code></pre><hr>
+<br>
+<h1 id="taxonomic-functional-profiling" data-source-line="382"><a class="anchor" href="#taxonomic-functional-profiling"><span class="octicon octicon-link"></span></a>Taxonomic &amp; Functional Profiling</h1>
+<h2 id="1-taxonomy-profiling" data-source-line="384"><a class="anchor" href="#1-taxonomy-profiling"><span class="octicon octicon-link"></span></a>1. Taxonomy Profiling</h2>
+<h2 id="tool-1-kraken2-bracken-이용" data-source-line="386"><a class="anchor" href="#tool-1-kraken2-bracken-이용"><span class="octicon octicon-link"></span></a>Tool 1: Kraken2 / Bracken 이용</h2>
+<ul data-source-line="387">
+<li><a href="https://ccb.jhu.edu/software/kraken2/">Kraken2</a> 설치는 Linux 와 Mac (Intel) 버전만 지원하며, M1 chip Mac 은 설치 불가능합니다.</li>
+<li>또한 Kraken2 의 DB building 에 매우 긴 시간이 소요되므로, 본 tool 은 local 에 설치하지 않고 Galaxy 를 이용하여 Web 에서 직접 진행합니다.</li>
+<li>Metagenomics 분석을 위한 Galaxy 는 <a href="https://usegalaxy.eu">Galaxy Europe</a>과 <a href="https://usegalaxy.org.au">Galaxy Austrailia</a> 를 사용하기를 추천합니다.</li>
+<li>Kraken2 Local 설치 시 실행 순서</li>
+</ul>
+<ol data-source-line="391">
+<li>kraken2 DB build</li>
+</ol>
+<pre><code class="hljs">kraken2-build --standard --db <span class="hljs-variable">$DBNAME</span></code></pre><ul data-source-line="395">
+<li>Custom DB 사용하고 싶을 시, taxonomy 및 library 생성된 상태에서 추가적으로 build 필요</li>
+</ul>
+<pre><code class="hljs">kraken-build --db customDB --download-taxonomy
+kraken-build --db customDB --download-library bacteria
+kraken-build --db customDB --build</code></pre><ol start="2" data-source-line="401">
+<li>Classification</li>
+</ol>
+<ul data-source-line="402">
+<li>output: *.kraken *.kreport</li>
+</ul>
+<pre><code class="hljs">kraken2 --db <span class="hljs-variable">$DBNAME</span> QCed_fastq --report</code></pre><ol start="3" data-source-line="406">
+<li>Bracken Build</li>
+</ol>
+<ul data-source-line="407">
+<li>Bracken으로 estimated abundance 를 구하기 위해서는, Kraken DB 에 각 genome을 read-length kmers 로 먼저 나눈 후, 그 kmers 들을 각각 classify 함</li>
+</ul>
+<pre><code class="hljs">bracken-build <span class="hljs-_">-d</span> <span class="hljs-variable">${KRAKEN_DB}</span> -t <span class="hljs-variable">${THREADS}</span> -k <span class="hljs-variable">${KMER_LEN}</span> <span class="hljs-_">-l</span> <span class="hljs-variable">${READ_LEN}</span> -x <span class="hljs-variable">${KRAKEN_INSTALLATION}</span></code></pre><ul data-source-line="411">
+<li>Bracken 으로 Abundance Estimation</li>
+</ul>
+<pre><code class="hljs">bracken <span class="hljs-_">-d</span> <span class="hljs-variable">${KRAKEN_DB}</span> -i <span class="hljs-variable">${SAMPLE}</span>.kreport -o <span class="hljs-variable">${SAMPLE}</span>.bracken -r <span class="hljs-variable">${READ_LEN}</span> <span class="hljs-_">-l</span> <span class="hljs-variable">${CLASSIFICATION_LEVEL}</span> -t <span class="hljs-variable">${THRESHOLD}</span></code></pre><h3 id="-galaxy-에서-실행-시-순서" data-source-line="415"><a class="anchor" href="#-galaxy-에서-실행-시-순서"><span class="octicon octicon-link"></span></a>- <strong>Galax</strong>y 에서 실행 시 순서</h3>
+<ol data-source-line="416">
+<li>
+<p><a href="https://usegalaxy.eu">Galaxy Europe</a> 또는 <a href="https://usegalaxy.org.au">Galaxy Austrailia</a> 접속</p>
+</li>
+<li>
+<p>Upload data: QCed fastq R1, R2 파일 각각 업로드</p>
+</li>
+<li>
+<p>Classification: Tools 검색창에 <strong>kraken2</strong> 검색 후 선택</p>
+</li>
+</ol>
+<pre><code>Tool Parameters
+- Single or paired reads: Paired
+ Forward strand: R1.fastq (여러샘플의 R1.fastq 파일들 동시 선택 가능)
+ Reverse strand: R2.fastq (여러샘플의 R2.fastq 파일들 동시 선택 가능)
+- Print scientific names instead of just taxids
+ Yes
+- Confidence
+ 0.5
+- Minimum hit groups
+ 2
+- Select a Kraken2 database
+ Standard plus protozoa &amp; fungi (2021)
+
+&gt; Run Tool
+</code></pre>
+<ol start="3" data-source-line="437">
+<li>Kraken Reports: Tools 검색창에 <strong>kraken-report</strong> 검색 후 선택</li>
+</ol>
+<pre><code>Tool Parameters
+- Kraken output
+ 위 2.결과파일 선택 (Classification)
+- Select a Kraken database
+ Bacteria
+
+&gt; Run Tool
+</code></pre>
+<p data-source-line="448">3-1(옵션). 여러샘플 report를 동시에 만들고 싶을때
+Tools 검색창에 <strong>kraken-mpa-report</strong> 검색 후 선택
+(단 이 파일은 Bracken 에는 이용 불가)</p>
+<pre><code>Tool Parameters
+- Kraken output
+ 위 2.결과파일 선택 (Classification)
+- Display taxa even if they lack a read in any sample
+ No
+- Display a header line indicating saple IDs
+ Yes
+- Select a Kraken database
+ Bacteria
+
+&gt; Run Tool
+</code></pre>
+<p data-source-line="465">3-2. Kraken2 report output file</p>
+<ul data-source-line="466">
+<li>아래와 같은 형식을 kraken report 형식이라고 합니다.</li>
+</ul>
+<table data-source-line="468">
+<thead>
+<tr>
+<th>column</th>
+<th>type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>The percentage of sequences covered by the clade rooted at this taxon</td>
+</tr>
+<tr>
+<td>2</td>
+<td>The number of sequences covered by the clade rooted at this taxon</td>
+</tr>
+<tr>
+<td>3</td>
+<td>The number of sequences assigned directly to this taxon</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Taxa rank,  (U)nclassified, (R)oot, (D)omain, (K)ingdom, (P)hylum, (C)lass, (O)rder, (F)amily, (G)enus, or (S)pecies</td>
+</tr>
+<tr>
+<td>5</td>
+<td>NCBI taxonomic ID number</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Taxonomic ID</td>
+</tr>
+</tbody>
+</table>
+<ol start="4" data-source-line="478">
+<li>Abundance Estimates 구하기: Tools 검색창에 <strong>Bracken</strong> 검색 후 선택</li>
+</ol>
+<ul data-source-line="479">
+<li>여러 샘플의 Bracken output files 을 merge 하는 방법은 구글링으로 다양한 스크립트를 찾을 수 있습니다.</li>
+</ul>
+<pre><code>Tool Parameters
+- Kraken report file
+ 위 3.결과파일 선택 (Kraken-report)
+- Select a Kmer distribution
+ Standard (2021-05-17)
+- Level
+ Species
+- Produce Kraken-Style Bracken report
+ Yes
+- Add log file output
+ Yes
+
+&gt; Run Tool
+</code></pre>
+<p data-source-line="496">4-1. Bracken output file</p>
+<ul data-source-line="497">
+<li>선택한 Taxa level 의 taxonomic ID</li>
+</ul>
+<table data-source-line="499">
+<thead>
+<tr>
+<th>Column Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>name</td>
+<td>Taxonomic ID</td>
+</tr>
+<tr>
+<td>taxonomy_id</td>
+<td>NCBI taxonomic ID</td>
+</tr>
+<tr>
+<td>taxonomy_lvl</td>
+<td>Taxa level</td>
+</tr>
+<tr>
+<td>kraken_assigned_reads</td>
+<td>Number of sequences assigned directly to this taxon using Kraken2</td>
+</tr>
+<tr>
+<td>added_reads</td>
+<td></td>
+</tr>
+<tr>
+<td>new_est_reads</td>
+<td>Number of reads that aligned to this classification using Bracken</td>
+</tr>
+<tr>
+<td>fraction_total_reads</td>
+<td>Proportion of reads that aligned to this classification</td>
+</tr>
+</tbody>
+</table>
+<ol start="5" data-source-line="511">
+<li>Visualization: Tools 검색창에 <strong>Krakentools: Convert kraken report file to krona text file</strong> 검색 후 선택</li>
+</ol>
+<pre><code>Tool Parameters
+- Kraken report file
+ 위 3.결과파일 선택 (Kraken-report)
+
+&gt; Run Tool
+</code></pre>
+<ol start="6" data-source-line="520">
+<li>Visualization: Tools 검색창에 <strong>Krona pie chart from taxonomic profile</strong> 검색 후 선택</li>
+</ol>
+<pre><code>Tool Parameters
+- Input data
+ Tabular
+ 위 5.결과파일 선택 (Convert kraken reporte file)
+
+&gt; Run Tool
+</code></pre>
+<br>
+<h2 id="tool-2-metaphlan4-이용-humann3-활용" data-source-line="534"><a class="anchor" href="#tool-2-metaphlan4-이용-humann3-활용"><span class="octicon octicon-link"></span></a>Tool 2: MetaPhLan4 이용 (HUMAnN3 활용)</h2>
+<ul data-source-line="535">
+<li><a href="https://huttenhower.sph.harvard.edu/humann/">HUMAnN3</a>은 Functional profiling 을 하기위한 단계 중, Marker gene mapping 단계를 거치기때문에, MetaPhlAn (본 실습에서 사용하는 버전은 <a href="https://huttenhower.sph.harvard.edu/metaphlan/">MetaPhlAn4</a>) 결과가 중간 과정에서 생성됩니다.</li>
+<li>한번의 run 으로 taxonomic &amp; functional profiling 을 동시에 얻을 수 있다는 장점이 있습니다.</li>
+<li>본 실습에서는 MetaPhlAn4 을 별도로 구동하지 않고, HUMAnN3 을 실행합니다.</li>
+</ul>
+<hr>
+<ul data-source-line="540">
+<li>
+<p>input 파일에는, fastq, fastq.gz, fasta, fasta.gz 포멧 모두 가능</p>
+</li>
+<li>
+<p>본인의 컴퓨터 사양(CPU)에 따라 가능한 core 수를 <code>--threads</code> 적용하면, 많은 core를 사용할 수록 당연히 분석시간이 짧아집니다.</p>
+</li>
+<li>
+<p>Translated search (DIAMOND)에 사용되는 DB 연구(자,환경)에 따라 여러가지를 선택할 수 있으며, 본 실습에서는 EC-filtered UniRef50 (0.3GB)의 작은 사이즈의 DB를 사용함</p>
+<ul>
+<li>full UniRef90 (20.7GB. 실제 분석 시 추천)</li>
+<li>EC-filtered UniRef90 (0.9GB)</li>
+<li>full UniRef50 (6.9GB)</li>
+<li><code>humann_databases --download uniref $DB명 $INSTALL_LOCATION</code> 으로 다운로드 후, 해당 DB를 사용하고 싶다면, humann 실행시 <code>protein-database $INSTALL_LOCATION</code> 옵션을 추가하여 사용</li>
+<li><code>--bypass-transtated-search</code> 옵션을 사용하여 translated search를 skip 할 수도 있음</li>
+</ul>
+</li>
+<li>
+<p>HUMAnN 실행</p>
+</li>
+</ul>
+<pre><code class="hljs"><span class="hljs-built_in">cd</span> ~/Desktop/KOGO_Shotgun</code></pre><pre><code class="hljs">humann \
+--input ./Outputs/04_filter_out_human/toy1_metagenome.fastq \
+--output ./my_results/09_toy1_humann \
+--threads 4 \
+--protein-database ./DB/Humann/uniref</code></pre><ul data-source-line="562">
+<li>여러 샘플을 동시에 HUMAnN 실행 방법
+<ul>
+<li>샘플 1개씩이 아닌, 폴더내 모든 샘플을 한꺼번에 돌리고 싶을때에는, filtered_fastq 파일들을 모두 한 폴더에 넣고, 해당 폴더명을 input 으로 지정할 수 있음</li>
+<li>filtered_fastq 파일들을 QCed_fastq 폴더로 몰아 넣기</li>
+</ul>
+</li>
+</ul>
+<pre><code class="hljs"><span class="hljs-comment">#cd ./Outputs/04_filter_out_human/   #실제 사용할때는 명령어 앞 #지우고 사용</span>
+
+<span class="hljs-comment">#mkdir QCed_fastq</span>
+
+<span class="hljs-comment">#mv *.fastq ./QCed_fastq</span>
+
+<span class="hljs-comment">#humann \</span>
+<span class="hljs-comment">#--input ./Outputs/04_filter_out_human/QCed_fastq \</span>
+<span class="hljs-comment">#--output ./my_results/05_humann_results_all</span></code></pre><h3 id="-humaan-outputs" data-source-line="578"><a class="anchor" href="#-humaan-outputs"><span class="octicon octicon-link"></span></a>- HUMAaN Outputs</h3>
+<ul data-source-line="579">
+<li>my_results 폴더 &gt; 09_toy1_humann 폴더를 Finder 에서 확인하세요.</li>
+<li>Outputs 폴더 &gt; 05_taxaNfunc 폴더
+<ul>
+<li>총 2명 샘플에 대한 HUMaN 결과파일</li>
+<li>이 결과는 full UniRef90 DB 로 미리 실행한 translated search된 결과입니다.</li>
+</ul>
+</li>
+<li>Finder로 확인하세요.</li>
+</ul>
+<pre><code class="hljs">├── Outputs
+    ├── 05_taxNfunc
+        ├── toy1_humann   
+            ├── *_genefamilies.tsv   <span class="hljs-comment"># gene families (Uniref90) 결과 (단위: RPK, reads per kilobase)</span>
+            ├── *_pathabundance.tsv   <span class="hljs-comment"># pathways (MetaCyc) 결과 </span>
+            ├── *_pathcoverage.tsv
+            ├── *_humann_temp
+                ├── *_diamond_aligned.tsv  <span class="hljs-comment"># DIAMOND (translated alignment step) 실행 후 aglignment 결과</span>
+                ├── *_diamond_unaligned.fa   <span class="hljs-comment"># DIAMOND 실행 후 unaligned reads</span>
+                ├── *_metaphlan_bowtie2.txt  <span class="hljs-comment"># metaphlan 실행 후 bowtie2 결과 -&gt; Metaphlan 을 다른 옵션으로 다시 돌리고 싶을 때 input 으로 사용 가능 </span>
+                ├── *_metaphlan_bugs_list.tsv <span class="hljs-comment"># metaphlan 실행후 Taxonomy profiling 결과파일!* (단위: relative abundance, 0-100 range)</span>
+                ├── *.log  <span class="hljs-comment"># HUMAnN 실행 로그파일: 각 단계의 분석 소요시간, unaligned reads 의 %, alignment statistics 등 확인 가능</span>
+        ├── toy2_humann</code></pre><br>
+<h4 id="-metaphlan-결과-확인" data-source-line="602"><a class="anchor" href="#-metaphlan-결과-확인"><span class="octicon octicon-link"></span></a>- MetaPhlAn 결과 확인</h4>
+<ul data-source-line="603">
+<li>작업폴더 (KOGO_Shotgun)로 이동</li>
+</ul>
+<pre><code class="hljs"><span class="hljs-built_in">cd</span> ~/Desktop/KOGO_Shotgun</code></pre><pre><code class="hljs">less -S ./Outputs/05_taxaNfunc/toy1_humann/toy1_metagenome_humann_temp/toy1_metagenome_metaphlan_bugs_list.tsv</code></pre><ul data-source-line="611">
+<li>확인했으면 q 를 누르고 빠져나오세요</li>
+</ul>
+<h4 id="-metaphlan-profile-합치기" data-source-line="613"><a class="anchor" href="#-metaphlan-profile-합치기"><span class="octicon octicon-link"></span></a>- MetaPhlAn profile 합치기</h4>
+<ul data-source-line="614">
+<li>humann 결과 중, *_bugs_list.tsv 가 MetaPhlAn 결과입니다.</li>
+<li>이 파일만 Output 폴더 06_taxonomy 폴더에 복사해놓았습니다.</li>
+<li>humann 스크립트로 여러샘플의 MetaPhlAn 결과파일을 합칠 수 있습니다.</li>
+</ul>
+<pre><code class="hljs">merge_metaphlan_tables.py \
+./Outputs/06_taxonomy/*_metagenome_metaphlan_bugs_list.tsv \
+&gt; ./my_results/10_merged_taxa_mpl4.txt</code></pre><pre><code class="hljs">less -S ./my_results/10_merged_taxa_mpl4.txt</code></pre><ul data-source-line="626">
+<li>Kraken report 또는 Bracken report 파일과 MetaPhlAn 결과를 엑셀로 열어서 비교해보세요. 어떤 차이가 있나요?</li>
+<li>Galaxy 에서 <strong>Krakentools: Convert kraken report file to MetaPhlAn-style</strong> 을 이용하면 Kraken report 를 MetaPhlAn 형태로 바꾸어 쉽게 비교 가능합니다.</li>
+</ul>
+<h4 id="-taxonomic-profiles-로-heatmap-그리기" data-source-line="633"><a class="anchor" href="#-taxonomic-profiles-로-heatmap-그리기"><span class="octicon octicon-link"></span></a>- Taxonomic profiles 로 Heatmap 그리기</h4>
+<ul data-source-line="634">
+<li>Species abundance 만 추출하기</li>
+</ul>
+<pre><code class="hljs">grep -E <span class="hljs-string">"s__|clade"</span> ./Outputs/06_taxonomy/merged_taxa_mpl4.txt \
+| grep -v <span class="hljs-string">"t__"</span> \
+| sed <span class="hljs-string">"s/^.*|//g"</span> \
+| sed <span class="hljs-string">"s/clade_name/male_female/g"</span> \
+| sed <span class="hljs-string">"s/_metagenome_metaphlan_bugs_list//g"</span> \
+&gt; ./my_results/11_merged_taxa_mpl4_species.txt</code></pre><pre><code class="hljs">less -S ./my_results/11_merged_taxa_mpl4_species.txt</code></pre><ul data-source-line="646">
+<li>hclust2.py 실행</li>
+<li>species level 만 그려보기 (top 10)</li>
+</ul>
+<pre><code class="hljs">hclust2.py \
+-i ./Outputs/06_taxonomy/merged_taxa_table.txt \
+-o ./my_results/12_metaphlan4_heatmap_species.png \
+--f_dist_f braycurtis \
+--s_dist_f braycurtis \
+--cell_aspect_ratio 0.5 \
+--log_scale \
+--ftop 10 \
+--flabel_size 10 --slabel_size 10 \
+--max_flabel_len 100 --max_slabel_len 100 \
+--dpi 300</code></pre><ul data-source-line="661">
+<li>모든 taxa level에 대해서 그려보기 (top 10)</li>
+</ul>
+<pre><code class="hljs">hclust2.py \
+-i ./Outputs/06_taxonomy/merged_taxa_mpl4.txt \
+-o ./my_results/13_metaphlan4_heatmap_alltaxa.png \
+--f_dist_f braycurtis \
+--s_dist_f braycurtis \
+--cell_aspect_ratio 0.5 \
+--log_scale \
+--ftop 10 \
+--flabel_size 10 --slabel_size 10 \
+--max_flabel_len 100 --max_slabel_len 100 \
+--dpi 300</code></pre><ul data-source-line="676">
+<li>plotting 에 대한 기타 상세옵션은 python hclust2.py --help 에서 확인가능</li>
+<li><a href="https://huttenhower.sph.harvard.edu/maaslin/">MaAsLin</a> 같은 통계분석 툴을 이용하여 보다 정확한 통계분석 가능</li>
+</ul>
+<ul data-source-line="679">
+<li>(옵션) SGB profiles 을 Genome Taxonomy database (<a href="https://gtdb.ecogenomic.org">GTDB</a>) taxonomy 로 바꾸기</li>
+</ul>
+<pre><code class="hljs">sgb_to_gtdb_profile.py -i <span class="hljs-variable">$metaphlan_output</span> -o <span class="hljs-variable">$GTDB_output</span></code></pre> <br>
+<h2 id="2-functional-profiling" data-source-line="687"><a class="anchor" href="#2-functional-profiling"><span class="octicon octicon-link"></span></a>2. Functional Profiling</h2>
+<pre><code class="hljs">├── Outputs
+    ├── 05_taxaNfunc
+        ├── toy1_humann   
+            ├── *_genefamilies.tsv   <span class="hljs-comment"># gene families (Uniref90) 결과 (단위: RPK, reads per kilobase)</span>
+            ├── *_pathabundance.tsv   <span class="hljs-comment"># pathways (MetaCyc) 결과 (단위: </span>
+            ├── *_pathcoverage.tsv</code></pre><ul data-source-line="696">
+<li>각 output 의 보다 상세한 설명은 <a href="https://github.com/biobakery/humann">HUMAnN 튜토리얼</a> 참고</li>
+<li>Gene famlies: Groups of evolutionarily-related protein-coding sequences that often perform similar functions.</li>
+<li>Pathway abundance: Abundances of the pathway's component reactions with each reaction's abundance computed as the sum over abundances of genes catalyzing the reaction.
+<ul>
+<li>Pathway abundance is proportional to the number of complete "copies" of the pathway in the community. Thus, for a simple linear pathway RXN1 + RXN2 + RXN3 + RXN4, if RXN1 is 10 times as abundant as RXNs 2-4, the pathway abundance will be driven by the abundances of RXNs 2-4.</li>
+<li>Unlike gene abundance, a pathway's community-level abundance is not necessarily the sum of its stratified abundance values. For example, continuing with the simple linear pathway example introduced above, if the abundances of RXNs 1-4 are [5, 5, 10, 10] in Species_A and [10, 10, 5, 5] in Species_B, HUMAnN 3.0 would report that Species_A and Species_B each contribute 5 complete copies of the pathway. However, at the community level, the reaction totals are [15, 15, 15, 15], and thus HUMAnN 3.0 would report 15 complete copies.</li>
+</ul>
+</li>
+<li>Pathway coverage: Alternative description of the presence (1) and absence (0) of pathways in a community, independent of their quantitative abundance. A confidence score to each reaction detected in the community (1= confidently detected pathway, 0=less confidently detected).</li>
+</ul>
+<br>
+<h4 id="-normalization-of-output-files" data-source-line="705"><a class="anchor" href="#-normalization-of-output-files"><span class="octicon octicon-link"></span></a>- Normalization of output files</h4>
+<ul data-source-line="706">
+<li>작업폴더 (KOGO_Shotgun)로 이동</li>
+</ul>
+<pre><code class="hljs"><span class="hljs-built_in">cd</span> /mnt/c/Users/윈도우사용자계정/Desktop/KOGO_Shotgun</code></pre><ul data-source-line="710">
+<li>genefamilies 파일 결과 확인해보기</li>
+</ul>
+<pre><code class="hljs">less -S ./Outputs/05_taxaNfunc/toy1_humann/toy1_metagenome_genefamilies.tsv</code></pre><pre><code class="hljs">humann_renorm_table \
+--input ./Outputs/05_taxaNfunc/toy1_humann/toy1_metagenome_genefamilies.tsv \
+--output ./my_results/14_toy1_genefamilies_relab.tsv \
+--units relab</code></pre><ul data-source-line="721">
+<li>renomalized genefamilies 파일 결과 확인해보기</li>
+</ul>
+<pre><code class="hljs">less -S ./my_results/14_toy1_genefamilies_relab.tsv</code></pre><br>
+<h4 id="-여러명의-individual-샘플-결과를-하나의-파일로-합치기" data-source-line="729"><a class="anchor" href="#-여러명의-individual-샘플-결과를-하나의-파일로-합치기"><span class="octicon octicon-link"></span></a>- 여러명의 Individual 샘플 결과를 하나의 파일로 합치기</h4>
+<ol data-source-line="730">
+<li>Gene families</li>
+</ol>
+<pre><code class="hljs">humann_join_tables \
+--input ./Outputs/07_humann_renorm/genefam_relab \
+--output ./my_results/15_humann_genefamilies_relab_merged.tsv \
+--file_name genefamilies_relab</code></pre><pre><code class="hljs">less -S ./my_results/15_humann_genefamilies_relab_merged.tsv</code></pre><ol start="2" data-source-line="741">
+<li>Pathways coverage</li>
+</ol>
+<pre><code class="hljs">humann_join_tables \
+--input ./Outputs/07_humann_renorm/pathcov \
+--output ./my_results/16_humann_pathcoverage_merged.tsv \
+--file_name pathcoverage</code></pre><pre><code class="hljs">less -S ./my_results/16_humann_pathcoverage_merged.tsv</code></pre><ol start="3" data-source-line="752">
+<li>Pathway abundance</li>
+</ol>
+<pre><code class="hljs">humann_join_tables \
+--input ./Outputs/07_humann_renorm/pathabun_relab \
+--output ./my_results/17_humann_pathabundance_relab_merged.tsv \
+--file_name pathabun_relab</code></pre><pre><code class="hljs">less -S ./my_results/17_humann_pathabundance_relab_merged.tsv</code></pre><br>
+<h4 id="-file-split-stratified-and-unstratified-table-생성" data-source-line="766"><a class="anchor" href="#-file-split-stratified-and-unstratified-table-생성"><span class="octicon octicon-link"></span></a>- File split: stratified and unstratified table 생성</h4>
+<ul data-source-line="767">
+<li>Gene families 나 Pathway abundance 에 contribute 하는 taxa 정보를 포함/제외 하는 명령어</li>
+</ul>
+<ol data-source-line="768">
+<li>Gene families</li>
+</ol>
+<pre><code class="hljs">humann_split_stratified_table \
+--input ./Outputs/07_humann_renorm/humann_genefamilies_relab_merged.tsv \
+--output ./my_results/18_genefam_split</code></pre><ol start="2" data-source-line="774">
+<li>Pathways coverage</li>
+</ol>
+<pre><code class="hljs">humann_split_stratified_table \
+--input ./Outputs/07_humann_renorm/humann_pathcoverage_merged.tsv \
+--output ./my_results/19_pathcov_split</code></pre><ol start="3" data-source-line="780">
+<li>Pathway abundance</li>
+</ol>
+<pre><code class="hljs">humann_split_stratified_table \
+--input ./Outputs/07_humann_renorm/humann_pathabundance_relab_merged.tsv \
+--output ./my_results/20_pathabun_split</code></pre><ul data-source-line="789">
+<li>이렇게 합쳐진 파일은 <a href="https://huttenhower.sph.harvard.edu/maaslin/">MaAsLin</a> 같은 통계분석 툴의 input file 로 사용 가능</li>
+</ul>
+<br>
+<h3 id="-downstream-analysis" data-source-line="794"><a class="anchor" href="#-downstream-analysis"><span class="octicon octicon-link"></span></a>- Downstream analysis</h3>
+<ul data-source-line="795">
+<li>관심있는 phenotype 과 metagenome 에 대한 association 분석을 하기위해서는, 마이크로바이옴데이터에 특화되어 있는 다양한 통계 툴 이용가능
+<ul>
+<li>
+<p><a href="https://huttenhower.sph.harvard.edu/maaslin/">MaAsLin</a></p>
+<ul>
+<li>Galaxy 버전: <a href="https://huttenhower.sph.harvard.edu/galaxy">HutLab</a></li>
+<li>Galaxy 버전: <a href="https://usegalaxy.eu">Galaxy Europe</a></li>
+</ul>
+</li>
+<li>
+<p><a href="https://github.com/FrederickHuangLin/ANCOM-Code-Archive">ANCOM</a></p>
+</li>
+<li>
+<p><a href="https://huttenhower.sph.harvard.edu/halla/">HAllA</a></p>
+</li>
+<li>
+<p><a href="https://github.com/ggloor/ALDEx2_dev">ALDEX</a>
+<br></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="-humann-bar-plot-그리기" data-source-line="805"><a class="anchor" href="#-humann-bar-plot-그리기"><span class="octicon octicon-link"></span></a>- HUMAnN bar plot 그리기</h3>
+<pre><code class="hljs">humann_barplot \
+--input ./Outputs/08_humann_split/sex_pathabund.pcl \
+--last-metadata sex \
+--focal-feature ARGININE-SYN4-PWY \
+--focal-metadata sex \
+--sort none \
+--exclude-unclassified \
+--output ./my_results/21_humann_barplot_ARGININE-SYN4-PWY</code></pre><ul data-source-line="816">
+<li>sort: none, sum, dominant, braycurtis, braycurtis_m, metadata 중 선택 가능</li>
+<li>plotting 에 대한 기타 상세옵션은 humann_barplot --help 에서 확인가능</li>
+</ul>
+<h1 id="assembly" data-source-line="820"><a class="anchor" href="#assembly"><span class="octicon octicon-link"></span></a>Assembly</h1>
+<h2 id="galaxy-이용" data-source-line="822"><a class="anchor" href="#galaxy-이용"><span class="octicon octicon-link"></span></a>Galaxy 이용</h2>
+<ul data-source-line="823">
+<li>Assembly 분석을 위한 Galaxy 는 마찬가지로 <a href="https://usegalaxy.eu">Galaxy Europe</a>과 <a href="https://usegalaxy.org.au">Galaxy Austrailia</a> 를 사용합니다. <a href="https://usegalaxy.org/">Galaxy US</a> 도 가능.</li>
+<li>
+<h4 id="assembly-과정"><a class="anchor" href="#assembly-과정"><span class="octicon octicon-link"></span></a>Assembly 과정</h4>
+</li>
+</ul>
+<pre><code>1. Assembly (MEGAHIT)
+2. Evaluation of contigs (Quast)
+3. Mapping of reads onto contig (Bowtie2, Samtools)
+4. Binning (MetaBAT2)
+5. Check bin quality (CheckM: Galaxy Europe에만 있음)
+6. Finding genes (Prodigal-Prokka 이용)
+</code></pre>
+<ol data-source-line="833">
+<li><strong>Assembly</strong>: Tools 검색창에 <strong>MEGAHIT</strong> 검색 후 선택</li>
+</ol>
+<pre><code>Tool Parameter
+- Select your input option
+&gt; Paired-end
+&gt;&gt; Mate 1 input reads: R1.fastq.gz 선택 (하나만 넣으면 individual assembly,여러샘플을 넣으면 co-assembly)
+&gt;&gt; Mate 2 input reads: R2.fastq.gz 선택 (하나만 넣으면 individual assembly,여러샘플을 넣으면 co-assembly)
+
+- K-mer specification method
+&gt; 내 read length 고려하여 선택
+
+- Output options
+&gt; Minimum length of contigs to output
+1000
+
+&gt; Run Tool
+</code></pre>
+<ul data-source-line="850">
+<li>디스크 아이콘 선택하여 assembly 결과 (*.fasta)를 다운로드 해보세요.</li>
+</ul>
+<ol start="2" data-source-line="852">
+<li><strong>QC</strong>:Tools 검색창에 <strong>Quast</strong> 검색 후 선택</li>
+</ol>
+<pre><code>Tool Parameter
+- Assembly mode?
+&gt; Individual assembly
+
+- Contigs/scaffolds file
+&gt; Assembly with MEGAHIT  #MEGAHIT 결과파일
+
+- Reads options (선택시, mapping reads to contigs, coverage 계산)
+&gt; Illumina paired-end reads
+&gt;&gt; QCed.fastq.gz 파일 선택 (R1 &amp; R2)
+
+- Type of assembly
+&gt; Metagnome
+
+- Reference genome
+&gt; SILVA database
+
+- Lower threshold for a contig length
+&gt; 1000
+
+- Output files
+&gt; HTML reports 선택
+
+&gt; Run Tool
+</code></pre>
+<ol start="3" data-source-line="880">
+<li><strong>Re-Mapping</strong>:Tools 검색창에 <strong>Bowtie2</strong> 검색 후 선택</li>
+</ol>
+<pre><code>Tool Parameter
+- Is this single or paired library
+&gt; Paired-end
+&gt;&gt; QCed.R1.fastq.gz
+&gt;&gt; QCed.R2.fastq.gz
+
+- Will you select a reference genome from your history or use a built-in index?
+&gt; Use a genome from the history and build index
+&gt;&gt; Assembly with MEGAHIT results
+
+- Do you want to tweak SAM/BAM Options?
+&gt; Supress SAM records for reads that failed to align
+&gt;&gt; Yes
+
+&gt; Run Tool
+</code></pre>
+<ul data-source-line="898">
+<li>디스크 이미지 클릭으로, *.bam 및 *.bai 파일 다운로드 가능</li>
+</ul>
+<p data-source-line="900"><code>4. Binning: Tools 검색창에 MeataBAT2 검색 후 선택 (본 실습에서는 minimum size of contig for binning 을 만족하지 않아 running 불가능)</code></p>
+<pre><code>Tool Parameter
+- Fasta file containing contigs
+&gt; Assembly with MEGAHIT result
+
+- Advanced options
+&gt; Minimum size of a contig for binning
+# MetaBAT2 의 contig minimum size 의 디폴트가 1500bp 인데, 실습파일은 &lt;1500bp 이라 실행 불가능
+
+&gt; Run Tool
+</code></pre>
+<ol start="4" data-source-line="913">
+<li><strong>Binning</strong> : <strong>CONCOCT</strong> 프로그램은 <a href="https://usegalaxy.eu">Galaxy Europe</a>에서만 가능합니다. 과 <a href="https://usegalaxy.org.au">Galaxy Austrailia</a> 또는 Galaxy US 에서 Assembly 작업을 했다면, 결과파일 (1. Assembly with MEGAHIT, 2. Bowtie2-alignment.bam) 을 컴퓨터에 저장하고, 그 파일을 Galaxy Europe에 다시 업로드 하여 사용하세요.</li>
+</ol>
+<p data-source-line="915">4-1. <strong>Binning</strong> - Contigs BED file 만들기: Tools 검색창에 <strong>CONCOCT</strong> 검색 후, CONCOCT: Cut up contigs in non-overlapping or overlapping parts of equal length 선택</p>
+<pre><code>Tool Parameter
+- Fasta contigs file
+&gt; Assembly with MEGAHIT result
+
+- Output bed file with exzct regions of the original contigs corresponding to the newly created contigs?
+&gt;&gt; Yes
+
+&gt; Run Tool
+</code></pre>
+<ul data-source-line="926">
+<li>Output: contig를 본래 길이보다 더 작게 자른 maximum 10000 bp 로 chunk 한 bed file (실습 파일의 contig는 최대 1500bp 미만의 length 라 실제적으로는 cut 되지 않음)</li>
+</ul>
+<p data-source-line="928">4-2. <strong>Binning</strong> - coverage table 만들기: Tools 검색창에 <strong>CONCOCT</strong> 검색 후, CONCOCT: Generate the input coverage table for CONCOCT 선택</p>
+<pre><code>Tool Parameter
+- Contigs BEDFile
+&gt; 4-1. 결과 format bed file
+
+- Type of assembly used to generate the contigs
+&gt; Individual assembly: 1 run per BAM file
+&gt; Sorted BAM file
+&gt;&gt; 3. bowtie2 결과 bam file
+
+&gt; Run Tool
+</code></pre>
+<ul data-source-line="941">
+<li>Output: coverage depth information 파일</li>
+</ul>
+<p data-source-line="943">4-3. <strong>Binning</strong> : Tools 검색창에 <strong>CONCOCT</strong> 검색 후, CONCOCT for metagenome binning 선택</p>
+<pre><code>Tool Parameter
+- Coverage file
+&gt; 4-2. 결과 CONCOCT: Generate the input coverage table
+
+- Composition file with sequences
+&gt; 4-1.결과 cut 된 contigs from CONCOCT
+
+&gt; Run Tool
+</code></pre>
+<ul data-source-line="954">
+<li>Output: CONCOCT 메인 결과파일. subcontig cluster 파일</li>
+</ul>
+<p data-source-line="956">4-4. <strong>Binning</strong> : Tools 검색창에 <strong>CONCOCT</strong> 검색 후, CONCOCT: Merge cut clusters and assign concensus clusters for the original contig 선택</p>
+<pre><code>Tool Parameter
+- Clusters generated by CONCOCT
+&gt; 4-3. 결과 중 cluster 파일
+
+&gt; Run Tool
+</code></pre>
+<ul data-source-line="964">
+<li>Output: subcontig clustering 을 original contig clustering으로 merge한 csv 파일</li>
+</ul>
+<p data-source-line="966">4-5. <strong>Binning</strong> : Tools 검색창에 <strong>CONCOCT</strong> 검색 후, CONCOCT: Extract a fasta file for each 선택</p>
+<pre><code>Tool Parameter
+- Original contig file
+&gt; Assembly with MEGAHIT result
+
+- CONCOCT clusters
+&gt; 4-4 결과. clustering merged file
+
+&gt; Run Tool
+</code></pre>
+<ul data-source-line="977">
+<li>Output: fasta_bins 폴더 (bin 별 fasta.fa 파일 저장)</li>
+</ul>
+<ol start="5" data-source-line="980">
+<li><strong>Bins evaluation</strong> : Tools 검색창에 <strong>CheckM</strong> 검색 후, CheckM lineage_wf 선택</li>
+</ol>
+<pre><code>Tool Parameter
+- Contigs to annotate
+&gt; In collection
+- Bins
+&gt; CONCOCT fasta_bin 폴더의 *fa collection
+
+- CONCOCT clusters
+&gt; 4-4 결과. clustering merged file
+
+&gt; Run Tool
+</code></pre>
+<ol start="6" data-source-line="994">
+<li><strong>Genes Finding and Annotation</strong> : Tools 검색창에 <strong>prokka</strong> 검색 후 선택</li>
+</ol>
+<pre><code>Tool Parameter
+- Contigs to annotate
+&gt; Assembly with MEGAHIT result (contig)
+&gt; 또는, CONCOCT 결과 fasta (bins)
+
+&gt; Run Tool
+</code></pre>
+<ol start="7" data-source-line="1004">
+<li><strong>Gene annotation View</strong> : Tools 검색창에 <strong>JBrowse</strong> 검색 후 JBrowse genome browser 선택</li>
+</ol>
+<pre><code>Tool Parameter
+- Reference genome to disply
+
+- Select the reference genome
+&gt; Prokka 결과 : fna
+
+&gt; Track Group
++ Insert Track Group
+- Track Category
+&gt; Gene annotation
+
+- Annotation Tract
+&gt; Prokka 결과: gff
+
+&gt; Run Tool
+</code></pre>
+<ol start="8" data-source-line="1023">
+<li><strong>Functional annotation</strong> : Tool 검색창에 <strong>eggNOG</strong> 검색 후 eggNOG Mapper 선택</li>
+</ol>
+<pre><code>Tool Parameter
+- Method to search seed orthologs
+&gt; MMseqs2
+
+- Fasta sequences to annotate
+&gt; Prokka 결과: fna
+
+- Type of sequences
+&gt; Metagenome
+
+&gt; Run Tool
+</code></pre>
+<p data-source-line="1038"><br><br></p>
+<h2 id="수고하셨습니다-br" data-source-line="1040"><a class="anchor" href="#수고하셨습니다-br"><span class="octicon octicon-link"></span></a>수고하셨습니다! <br></h2>
+<h3 id="본-스크립트는-잘-보관하셔서-차후-metagenomics-분석하실-때-요긴하게-사용하시길-바랍니다~poopbugsweat_smilegrinheart" data-source-line="1041"><a class="anchor" href="#본-스크립트는-잘-보관하셔서-차후-metagenomics-분석하실-때-요긴하게-사용하시길-바랍니다~poopbugsweat_smilegrinheart"><span class="octicon octicon-link"></span></a>본 스크립트는 잘 보관하셔서 차후 Metagenomics 분석하실 때 요긴하게 사용하시길 바랍니다~<i class="e1a-poop"></i><i class="e1a-bug"></i><i class="e1a-sweat_smile"></i><i class="e1a-grin"></i><i class="e1a-heart"></i></h3>
+<hr>
+<p data-source-line="1044">강의자료 제작: <span style="color:blue">성균관대학교 삼성융합의과학원 <strong>김한나</strong></span> (문의: <a href="mailto:147942@hanmail.net">147942@hanmail.net</a>)</p>
+<hr>
+</article><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.min.js"></script><script>$(function() { $('canvas.chartjs').each(function() { new Chart($(this), JSON.parse($(this).text())); }); });</script></body></html>
